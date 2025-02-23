@@ -45,6 +45,14 @@ export interface Policy {
 }
 
 export interface Claim {
+  fraud_assessment: {
+    prediction: string;
+    reasons: string[];
+    score: number;
+    riskLevel: string;
+    details?: string;
+  };
+  location: string;
   id: string;
   type: string;
   status: string;

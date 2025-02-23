@@ -61,7 +61,6 @@ function Apply() {
     policy_csl: 0,
     total_insurance_amount: 0,
   });
-  const [error, setError] = useState<string | null>(null);
 
   const steps = [
     { number: 1, title: "Vehicle Details", icon: Car },
@@ -96,12 +95,7 @@ function Apply() {
       } else {
         throw new Error("Failed to submit application");
       }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "An error occurred while submitting the application"
-      );
+    } catch {
       return false;
     }
   };
@@ -118,8 +112,7 @@ function Apply() {
   };
 
   const handleBack = () => {
-    setStep((prev) => Math.max(prev - 1, 1));
-    setError(null); // Clear any existing errors when going back
+    setStep((prev) => Math.max(prev - 1, 1)); // Clear any existing errors when going back
   };
 
   const updateFormData = (data: Partial<FormData>) => {

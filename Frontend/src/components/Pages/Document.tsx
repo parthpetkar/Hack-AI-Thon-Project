@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, User, ClipboardList, X, Upload, File } from "lucide-react";
+import { FileText, X, Upload, File } from "lucide-react";
 
 type DocumentData = {
   file_name: string;
@@ -14,8 +14,6 @@ type UploadFormData = {
   documentName: string;
   file: File | null;
 };
-
-const DOCUMENT_TYPES = ["Policy", "KYC", "Medical", "Claim", "Other"] as const;
 
 const Documents: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,20 +32,20 @@ const Documents: React.FC = () => {
 
   const fetchDocuments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://127.0.0.1:8081/docs/get_images', {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8081/docs/get_images", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
-      if (!response.ok) throw new Error('Failed to fetch documents');
-      
+
+      if (!response.ok) throw new Error("Failed to fetch documents");
+
       const data = await response.json();
       setDocumentsList(data.images);
     } catch (error) {
-      console.error('Error fetching documents:', error);
-      alert('Failed to fetch documents. Please try again.');
+      console.error("Error fetching documents:", error);
+      alert("Failed to fetch documents. Please try again.");
     }
   };
 
@@ -57,27 +55,31 @@ const Documents: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       const formDataObj = new FormData();
-      formDataObj.append('file', formData.file);
-      
-      const uploadResponse = await fetch('http://127.0.0.1:8081/docs/upload', {
-        method: 'POST',
+      formDataObj.append("file", formData.file);
+
+      const uploadResponse = await fetch("http://127.0.0.1:8081/docs/upload", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: formDataObj
+        body: formDataObj,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error('Failed to upload document');
+        throw new Error("Failed to upload document");
       }
 
       const result = await uploadResponse.json();
-      
+
       // Show the prediction result
-      alert(`Document analyzed!\nResult: ${result.predicted_label}\nConfidence: ${(result.confidence * 100).toFixed(2)}%`);
+      alert(
+        `Document analyzed!\nResult: ${result.predicted_label}\nConfidence: ${(
+          result.confidence * 100
+        ).toFixed(2)}%`
+      );
 
       // Refresh the documents list
       await fetchDocuments();
@@ -85,8 +87,8 @@ const Documents: React.FC = () => {
       setIsModalOpen(false);
       setFormData({ documentType: "", documentName: "", file: null });
     } catch (error) {
-      console.error('Error uploading document:', error);
-      alert('Failed to upload document. Please try again.');
+      console.error("Error uploading document:", error);
+      alert("Failed to upload document. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +115,11 @@ const Documents: React.FC = () => {
   };
 
   const handleFile = (file: File) => {
-    if (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg") {
+    if (
+      file.type === "image/png" ||
+      file.type === "image/jpeg" ||
+      file.type === "image/jpg"
+    ) {
       setFormData((prev) => ({ ...prev, file }));
     } else {
       alert("Please upload only PNG, JPG, or JPEG files");
@@ -158,12 +164,20 @@ const Documents: React.FC = () => {
                   <div className="flex-1">
                     <p className="font-medium">{doc.file_name}</p>
                     <div className="flex flex-col space-y-1 text-sm">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs 
-                        ${doc.predicted_label === 'Real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {doc.predicted_label} ({(doc.confidence * 100).toFixed(2)}% confidence)
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs 
+                        ${
+                          doc.predicted_label === "Real"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {doc.predicted_label} (
+                        {(doc.confidence * 100).toFixed(2)}% confidence)
                       </span>
                       <span className="text-gray-500">
-                        Uploaded on {new Date(doc.upload_date).toLocaleDateString()}
+                        Uploaded on{" "}
+                        {new Date(doc.upload_date).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -195,7 +209,11 @@ const Documents: React.FC = () => {
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-                  ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"}
+                  ${
+                    dragActive
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300"
+                  }
                   ${formData.file ? "bg-green-50" : ""}`}
               >
                 <input
