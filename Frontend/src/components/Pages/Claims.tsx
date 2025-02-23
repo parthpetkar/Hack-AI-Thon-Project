@@ -598,8 +598,6 @@ const Claims: React.FC = () => {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [showClaimForm, setShowClaimForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchClaims();
@@ -712,20 +710,6 @@ const Claims: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (error && claims.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={fetchClaims}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Retry
-        </button>
       </div>
     );
   }
