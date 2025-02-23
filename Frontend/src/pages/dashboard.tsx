@@ -19,9 +19,16 @@ const Dashboard = () => {
     name: "",
     customerId: "SBI87654321",
     email: "rajesh.kumar@email.com",
-    phone: "+91 98765 43210",
+    mobile: "+91 98765 43210",
     address: "123, Park Street, Mumbai",
-    activePolicies: 3,
+    otherDetails: {
+      sex: undefined,
+      dob: undefined,
+      education_level: "",
+      occupation: "",
+      hobbies: "",
+      relationship: "",
+    },
   };
 
   const renderContent = () => {

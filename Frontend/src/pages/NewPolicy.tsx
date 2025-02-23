@@ -61,6 +61,7 @@ function Apply() {
     policy_csl: 0,
     total_insurance_amount: 0,
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
 
   const steps = [

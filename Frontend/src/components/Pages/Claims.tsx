@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { Calendar, Upload, X } from "lucide-react";
-import { Claim, FormData, ClaimFormProps } from "../../types";
+import type { Claim, FormData, ClaimFormProps } from "../../types";
 
 function ClaimForm({ onClose, onSubmit }: ClaimFormProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -593,25 +594,141 @@ function ClaimForm({ onClose, onSubmit }: ClaimFormProps) {
   );
 }
 
-const claims: Claim[] = [
-  {
-    id: "CLM-2024-001",
-    type: "Vehicle Insurance",
-    status: "In Progress",
-    amount: 75000,
-    date: "01 Mar 2024",
-    details: "Multi-vehicle Collision",
-  },
-];
-
 const Claims: React.FC = () => {
+  const [claims, setClaims] = useState<Claim[]>([]);
   const [showClaimForm, setShowClaimForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmitClaim = (formData: FormData) => {
-    console.log("New claim submitted:", formData);
-    setShowClaimForm(false);
-    // Handle claim submission logic here
+  useEffect(() => {
+    fetchClaims();
+  }, []);
+
+  const fetchClaims = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:8081/claims/view", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch claims");
+      }
+
+      const fetchedClaims = await response.json();
+      setClaims(fetchedClaims);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleSubmitClaim = async (formData: FormData) => {
+    try {
+      setLoading(true);
+
+      // Submit claim data
+      const response = await fetch("http://localhost:8081/claims/detect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit claim");
+      }
+
+      const { claim_id } = await response.json();
+
+      // Upload files if any
+      if (formData.images.length > 0 || formData.repairBill) {
+        const fileFormData = new FormData();
+        formData.images.forEach((image, index) => {
+          fileFormData.append(`image_${index}`, image);
+        });
+
+        if (formData.repairBill) {
+          fileFormData.append("repair_bill", formData.repairBill);
+        }
+
+        const fileResponse = await fetch(`/api/claims/${claim_id}/files`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: fileFormData,
+        });
+
+        if (!fileResponse.ok) {
+          throw new Error("Failed to upload files");
+        }
+      }
+
+      await fetchClaims();
+      setShowClaimForm(false);
+      toast.success("Claim submitted successfully");
+    } catch {
+      toast.error("Failed to submit claim");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFraudLabel = (prediction: string) => {
+    switch (prediction.toLowerCase()) {
+      case "high":
+        return (
+          <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+            High Risk
+          </span>
+        );
+      case "medium":
+        return (
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+            Medium Risk
+          </span>
+        );
+      case "low":
+        return (
+          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+            Low Risk
+          </span>
+        );
+      default:
+        return (
+          <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
+            Pending
+          </span>
+        );
+    }
+  };
+
+  if (loading && claims.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error && claims.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600">{error}</p>
+        <button
+          onClick={fetchClaims}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -623,6 +740,7 @@ const Claims: React.FC = () => {
           <button
             onClick={() => setShowClaimForm(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            disabled={loading}
           >
             File New Claim
           </button>
@@ -640,9 +758,13 @@ const Claims: React.FC = () => {
                   </h4>
                   <p className="text-sm text-gray-500">Claim ID: {claim.id}</p>
                 </div>
-                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                  {claim.status}
-                </span>
+                <div className="flex space-x-2">
+                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+                    {claim.status}
+                  </span>
+                  {claim.fraud_assessment &&
+                    getFraudLabel(claim.fraud_assessment.prediction)}
+                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
@@ -659,7 +781,20 @@ const Claims: React.FC = () => {
                   <p className="text-gray-600">Type</p>
                   <p className="font-medium text-blue-900">{claim.details}</p>
                 </div>
+                <div>
+                  <p className="text-gray-600">Location</p>
+                  <p className="font-medium text-blue-900">
+                    {claim.location || "N/A"}
+                  </p>
+                </div>
               </div>
+              {claim.fraud_assessment?.reasons && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    {claim.fraud_assessment.reasons}
+                  </p>
+                </div>
+              )}
               <div className="mt-4 flex space-x-3">
                 <button className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors">
                   Track Status
