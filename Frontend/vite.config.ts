@@ -6,7 +6,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: "0.0.0.0", // Allows access from other devices
-    port: 5173, // Change the port if needed
+    host: "0.0.0.0",
+    port: 5173,
+    allowedHosts: [
+      "hack-ai-thon-project.onrender.com",
+      "https://hack-ai-thon-project-d8qt.onrender.com",
+    ], // Add your domain here
   },
 });
