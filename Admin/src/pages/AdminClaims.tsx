@@ -42,7 +42,9 @@ const AdminClaims = () => {
 
   const fetchClaims = async () => {
     try {
-      const response = await fetch("http://localhost:8081/admin/claims");
+      const response = await fetch(
+        "https://hack-ai-thon-project-d8qt.onrender.com/admin/claims"
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch claims");
       }
@@ -65,7 +67,7 @@ const AdminClaims = () => {
   ) => {
     try {
       // Optionally, send an API request to update the claim's status on the backend.
-      // await fetch(`http://localhost:8081/admin/claims/${claimManagementId}`, {
+      // await fetch(`https://hack-ai-thon-project-d8qt.onrender.com/admin/claims/${claimManagementId}`, {
       //   method: "PUT",
       //   headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify({ status: newStatus }),

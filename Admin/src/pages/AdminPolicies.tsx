@@ -59,7 +59,9 @@ const AdminPolicies = () => {
 
   const fetchPolicies = async () => {
     try {
-      const response = await fetch("http://localhost:8081/admin/policies");
+      const response = await fetch(
+        "https://hack-ai-thon-project-d8qt.onrender.com/admin/policies"
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch policies");
       }
@@ -141,7 +143,7 @@ const AdminPolicies = () => {
   const updatePolicyStatus = async (policyId: string, newStatus: string) => {
     try {
       // Optionally, send an API request to update the policy's status on the backend.
-      // await fetch(`http://localhost:8081/admin/policies/${policyId}`, {
+      // await fetch(`https://hack-ai-thon-project-d8qt.onrender.com/admin/policies/${policyId}`, {
       //   method: "PUT",
       //   headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify({ status: newStatus }),

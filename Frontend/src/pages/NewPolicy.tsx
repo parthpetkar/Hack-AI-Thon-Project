@@ -80,7 +80,7 @@ function Apply() {
       }
 
       const response = await axios.post(
-        "http://localhost:8081/apply/new",
+        "https://hack-ai-thon-project-d8qt.onrender.com/apply/new",
         formData,
         {
           headers: {

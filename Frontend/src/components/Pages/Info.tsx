@@ -4,7 +4,7 @@ import axios from "axios";
 import { User, Insurance } from "../../types";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "http://localhost:8081/api";
+const API_BASE_URL = "https://hack-ai-thon-project-d8qt.onrender.com/api";
 
 const PersonalInfo: React.FC = () => {
   const navigate = useNavigate();

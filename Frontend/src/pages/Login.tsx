@@ -36,8 +36,8 @@ function App() {
 
     try {
       const endpoint = isLogin
-        ? "http://localhost:8081/auth/sign-in"
-        : "http://localhost:8081/auth/register";
+        ? "https://hack-ai-thon-project-d8qt.onrender.com/auth/sign-in"
+        : "https://hack-ai-thon-project-d8qt.onrender.com/auth/register";
 
       // Create payload based on whether it's login or register
       const payload = isLogin

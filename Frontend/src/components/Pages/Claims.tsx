@@ -606,11 +606,14 @@ const Claims: React.FC = () => {
   const fetchClaims = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8081/claims/view", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        "https://hack-ai-thon-project-d8qt.onrender.com/claims/view",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch claims");
@@ -628,14 +631,17 @@ const Claims: React.FC = () => {
       setLoading(true);
 
       // Submit claim data
-      const response = await fetch("http://localhost:8081/claims/detect", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://hack-ai-thon-project-d8qt.onrender.com/claims/detect",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to submit claim");
