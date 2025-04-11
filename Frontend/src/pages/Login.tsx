@@ -11,11 +11,49 @@ import {
   IndianRupee,
 } from "lucide-react";
 import OTPInput from "../components/Auth/OTPInput";
+import emailjs from "emailjs-com";
+
+// Function to send OTP via EmailJS
+const sendOTPEmail = async (email: string, otp: string, time: string) => {
+  try {
+    console.log("📧 Sending OTP email...");
+    console.log("Template Parameters:", { passcode: otp, time, email });
+
+    const templateParams = {
+      passcode: otp,
+      time: time,
+      email: email, 
+    };
+
+    // const serviceID = import.meta.env.REACT_APP_EMAILJS_SERVICE_ID || "";
+    // const templateID = import.meta.env.REACT_APP_EMAILJS_TEMPLATE_ID || "";
+    // const userID = import.meta.env.REACT_APP_EMAILJS_PUBLIC_KEY || "";
+
+  const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID || "";
+  const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "";
+  const userID = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "";
+
+    console.log("Using Service ID:", serviceID);
+    console.log("Using Template ID:", templateID);
+    console.log("Using User ID:", userID);
+
+    await emailjs.send(
+      serviceID,        // EmailJS Service ID
+      templateID,       // Template ID
+      templateParams,
+      userID            // Public Key
+    );
+    console.log("✅ OTP sent successfully");
+  } catch (error) {
+    console.error("❌ Failed to send OTP", error);
+  }
+};
 
 function App() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [showOTP, setShowOTP] = useState(false);
+  const [generatedOTP, setGeneratedOTP] = useState(""); // Store generated OTP
   const [formData, setFormData] = useState({
     email: "",
     mobile: "",
@@ -27,7 +65,7 @@ function App() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear any previous errors
+    setError("");
 
     if (!isLogin && formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -39,7 +77,6 @@ function App() {
         ? "http://localhost:8081/auth/sign-in"
         : "http://localhost:8081/auth/register";
 
-      // Create payload based on whether it's login or register
       const payload = isLogin
         ? {
             email: formData.email,
@@ -56,11 +93,14 @@ function App() {
 
       if (response.status === 200 || response.status === 201) {
         localStorage.setItem("token", response.data.token);
-        console.log(
-          isLogin ? "Sign-in successful!" : "Registration successful!"
-        );
+        console.log(isLogin ? "Sign-in successful!" : "Registration successful!");
 
         if (isLogin) {
+          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          const expiryTime = new Date(Date.now() + 15 * 60000).toLocaleTimeString();
+
+          setGeneratedOTP(otp); // Save for later verification
+          await sendOTPEmail(formData.email, otp, expiryTime);
           setShowOTP(true);
         } else {
           navigate("/dashboard");
@@ -81,9 +121,13 @@ function App() {
     }
   };
 
-  const handleOTPVerification = (otp: string) => {
-    console.log("OTP Verified:", otp);
-    navigate("/dashboard");
+  const handleOTPVerification = (enteredOTP: string) => {
+    if (enteredOTP === generatedOTP) {
+      console.log("✅ OTP Verified");
+      navigate("/dashboard");
+    } else {
+      setError("Invalid OTP. Please try again.");
+    }
   };
 
   return (
@@ -274,13 +318,11 @@ function App() {
             <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl border border-white/20 shadow-2xl">
               <div className="flex items-center justify-center mb-6 space-x-2">
                 <Smartphone className="h-8 w-8 text-green-500" />
-                <h2 className="text-2xl font-bold text-white">
-                  Verify Your Mobile
-                </h2>
+                <h2 className="text-2xl font-bold text-white">Verify Your Email</h2>
               </div>
               <p className="text-green-200/80 mb-6 text-center">
-                We've sent a verification code to your mobile number ending in{" "}
-                {formData.mobile.slice(-4)}
+                We’ve sent a verification code to your email:{" "}
+                <strong>{formData.email}</strong>
               </p>
               <OTPInput length={6} onComplete={handleOTPVerification} />
               <button
